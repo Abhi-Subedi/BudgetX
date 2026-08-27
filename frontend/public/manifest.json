@@ -1,0 +1,16 @@
+{
+  "name": "BudgetX",
+  "short_name": "BudgetX",
+  "description": "Personal & Family Financial Operating System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B1120",
+  "theme_color": "#10B981",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

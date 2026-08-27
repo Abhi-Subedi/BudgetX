@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: budgetx-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: budgetx
+      POSTGRES_PASSWORD: budgetx
+      POSTGRES_DB: budgetx
+    ports:
+      - "5432:5432"
+    volumes:
+      - budgetx_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U budgetx"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  budgetx_pgdata:
