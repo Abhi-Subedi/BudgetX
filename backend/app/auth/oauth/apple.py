@@ -29,6 +29,12 @@ _apple_public_keys: dict = {}
 _apple_keys_fetched_at: float = 0
 
 
+def get_redirect_uri() -> str:
+    if _settings.environment == "production":
+        return f"{_settings.frontend_url_production}/api/oauth/apple/callback"
+    return "http://localhost:8000/api/oauth/apple/callback"
+
+
 def _fetch_apple_keys() -> dict:
     """Fetch and cache Apple's public signing keys."""
     global _apple_public_keys, _apple_keys_fetched_at
@@ -54,7 +60,7 @@ def get_apple_authorization_url(state: str | None = None, nonce: str | None = No
         nonce = secrets.token_urlsafe(16)
     params = {
         "client_id": _settings.apple_client_id,
-        "redirect_uri": "postmessage",
+        "redirect_uri": get_redirect_uri(),
         "response_type": "code id_token",
         "scope": "name email",
         "response_mode": "form_post",
@@ -87,7 +93,7 @@ def exchange_code(code: str) -> dict:
         "code": code,
         "client_id": _settings.apple_client_id,
         "client_secret": client_secret,
-        "redirect_uri": "postmessage",
+        "redirect_uri": get_redirect_uri(),
         "grant_type": "authorization_code",
     }
     resp = httpx.post(APPLE_TOKEN_URL, data=data, timeout=15)

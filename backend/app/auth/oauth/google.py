@@ -21,6 +21,12 @@ GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo"
 settings = get_settings()
 
 
+def get_redirect_uri() -> str:
+    if settings.environment == "production":
+        return f"{settings.frontend_url_production}/api/oauth/google/callback"
+    return "http://localhost:8000/api/oauth/google/callback"
+
+
 def get_google_authorization_url(state: str | None = None) -> str:
     """Build the Google OAuth authorization URL."""
     if not settings.google_client_id:
@@ -29,7 +35,7 @@ def get_google_authorization_url(state: str | None = None) -> str:
         state = secrets.token_urlsafe(32)
     params = {
         "client_id": settings.google_client_id,
-        "redirect_uri": "postmessage",
+        "redirect_uri": get_redirect_uri(),
         "response_type": "code",
         "scope": "openid email profile",
         "access_type": "offline",
@@ -47,7 +53,7 @@ def exchange_code(code: str) -> dict:
         "code": code,
         "client_id": settings.google_client_id,
         "client_secret": settings.google_client_secret,
-        "redirect_uri": "postmessage",
+        "redirect_uri": get_redirect_uri(),
         "grant_type": "authorization_code",
     }
     resp = httpx.post(GOOGLE_TOKEN_URL, data=data, timeout=15)

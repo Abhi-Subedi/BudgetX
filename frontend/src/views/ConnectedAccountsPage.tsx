@@ -7,6 +7,7 @@ import { Badge } from "../components/ui/Controls";
 import { Button } from "../components/ui/Button";
 import { Icon } from "../components/icons";
 import { useToast } from "../hooks/useToast";
+import { openOAuthPopup } from "../lib/oauth";
 import * as api from "../lib/api";
 
 interface Provider {
@@ -107,7 +108,16 @@ export default function ConnectedAccountsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => toast("Disconnect functionality coming soon")}
+                            onClick={async () => {
+                              try {
+                                await api.del(`/oauth/${provider.id}/unlink`);
+                                toast(`${provider.label} account disconnected.`);
+                                const res = await api.get<{ providers: Provider[] }>("/oauth/providers");
+                                setProviders(res.providers ?? []);
+                              } catch (err) {
+                                toast(err instanceof Error ? err.message : "Failed to disconnect");
+                              }
+                            }}
                           >
                             Disconnect
                           </Button>
@@ -117,7 +127,17 @@ export default function ConnectedAccountsPage() {
                       <Button
                         variant="secondary"
                         size="sm"
-                        onClick={() => toast("OAuth connection coming soon")}
+                        onClick={async () => {
+                          try {
+                            const { code } = await openOAuthPopup(provider.id as "google" | "apple");
+                            await api.post(`/oauth/${provider.id}/link`, { code });
+                            toast(`${provider.label} account connected!`);
+                            const res = await api.get<{ providers: Provider[] }>("/oauth/providers");
+                            setProviders(res.providers ?? []);
+                          } catch (err) {
+                            toast(err instanceof Error ? err.message : `Failed to connect ${provider.label}`);
+                          }
+                        }}
                       >
                         Connect {provider.label}
                       </Button>
