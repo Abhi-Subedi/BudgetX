@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:3000"
 
-    frontend_url_production: str = "https://budget-x-drab.vercel.app"
+    frontend_url_production: str = "https://budget-x-ch9q.vercel.app"
 
     @field_validator("secret_key")
     @classmethod
