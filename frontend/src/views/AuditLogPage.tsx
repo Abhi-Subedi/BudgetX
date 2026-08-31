@@ -49,7 +49,7 @@ function formatTimestamp(iso: string) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  }).format(d);
+  }).format((d ?? undefined));
 }
 
 export default function AuditLogPage() {
