@@ -31,20 +31,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/layout.js"
     ],
-    "/(app)/health/page": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(app)/health/page.js"
+      "static/chunks/app/_not-found/page.js"
     ],
-    "/(app)/transactions/page": [
+    "/(auth)/register/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(app)/transactions/page.js"
-    ],
-    "/(app)/transfers/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(app)/transfers/page.js"
+      "static/chunks/app/(auth)/register/page.js"
     ]
   }
 }
