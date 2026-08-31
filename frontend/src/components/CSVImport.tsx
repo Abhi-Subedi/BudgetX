@@ -90,20 +90,31 @@ export function CSVImport() {
       />
       <button
         onClick={() => fileRef.current?.click()}
-        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-surface px-3.5 text-[13px] font-medium text-ink2 transition-colors hover:bg-sunken/60 hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-surface px-3.5 text-[13px] font-medium text-ink2 transition-colors hover:bg-sunken/60 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
       >
         <Icon name="arrow-up" className="size-4" />
         Import CSV
       </button>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Import Transactions" wide>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Import Transactions"
+        wide
+      >
         <div className="p-5">
           {preview && preview.length === 0 ? (
-            <p className="text-sm text-ink3">No valid transactions found in the file.</p>
+            <p className="text-sm text-ink3">
+              No valid transactions found in the file.
+            </p>
           ) : (
             <>
               <p className="mb-3 text-sm text-ink2">
-                Previewing <strong className="font-semibold text-paper">{preview?.length ?? 0}</strong> transaction(s).
+                Previewing{" "}
+                <strong className="font-semibold text-white">
+                  {preview?.length ?? 0}
+                </strong>{" "}
+                transaction(s).
               </p>
               <div className="max-h-64 overflow-auto rounded-lg border border-line">
                 <table className="w-full text-left text-xs">
@@ -111,8 +122,12 @@ export function CSVImport() {
                     <tr className="border-b border-line bg-sunken">
                       <th className="px-3 py-2 font-medium text-ink3">Date</th>
                       <th className="px-3 py-2 font-medium text-ink3">Type</th>
-                      <th className="px-3 py-2 font-medium text-ink3">Amount</th>
-                      <th className="px-3 py-2 font-medium text-ink3">Category</th>
+                      <th className="px-3 py-2 font-medium text-ink3">
+                        Amount
+                      </th>
+                      <th className="px-3 py-2 font-medium text-ink3">
+                        Category
+                      </th>
                       <th className="px-3 py-2 font-medium text-ink3">Payee</th>
                     </tr>
                   </thead>
@@ -121,8 +136,12 @@ export function CSVImport() {
                       <tr key={i} className="border-b border-line/50">
                         <td className="px-3 py-1.5 text-ink2">{row.date}</td>
                         <td className="px-3 py-1.5 text-ink2">{row.type}</td>
-                        <td className="px-3 py-1.5 font-medium text-paper">{row.amount}</td>
-                        <td className="px-3 py-1.5 text-ink2">{row.category}</td>
+                        <td className="px-3 py-1.5 font-medium text-white">
+                          {row.amount}
+                        </td>
+                        <td className="px-3 py-1.5 text-ink2">
+                          {row.category}
+                        </td>
                         <td className="px-3 py-1.5 text-ink2">{row.payee}</td>
                       </tr>
                     ))}
@@ -130,12 +149,19 @@ export function CSVImport() {
                 </table>
               </div>
               {(preview?.length ?? 0) > 20 && (
-                <p className="mt-2 text-xs text-ink3">…and {(preview?.length ?? 0) - 20} more rows.</p>
+                <p className="mt-2 text-xs text-ink3">
+                  …and {(preview?.length ?? 0) - 20} more rows.
+                </p>
               )}
             </>
           )}
           {error ? (
-            <p role="alert" className="mt-4 rounded-md bg-negtint px-3.5 py-2.5 text-sm text-neg">{error}</p>
+            <p
+              role="alert"
+              className="mt-4 rounded-md bg-negtint px-3.5 py-2.5 text-sm text-neg"
+            >
+              {error}
+            </p>
           ) : null}
           <div className="mt-5 flex justify-end gap-2.5">
             <button

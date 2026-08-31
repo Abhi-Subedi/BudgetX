@@ -114,7 +114,7 @@ export function TransactionFormModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? "Edit Transaction" : undefined}>
+    <Modal open={open} onClose={onClose} title={editing ? "Edit Transaction" : undefined} >
       <div className="px-5 pb-6 pt-5 sm:px-6">
         {!editing ? (
           <>

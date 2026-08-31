@@ -32,7 +32,9 @@ export default function NetWorthPage() {
   const currency = user?.currency ?? "USD";
   const locale = user?.locale ?? "en-US";
   const currentRes = useResource<NetWorthCurrent>("/net-worth/current");
-  const historyRes = useResource<{ items: NetWorthHistoryItem[] }>("/net-worth/history");
+  const historyRes = useResource<{ items: NetWorthHistoryItem[] }>(
+    "/net-worth/history",
+  );
 
   const [snapshotBusy, setSnapshotBusy] = useState(false);
 
@@ -57,7 +59,8 @@ export default function NetWorthPage() {
         subtitle="Assets minus liabilities over time."
         actions={
           <Button onClick={() => void saveSnapshot()} disabled={snapshotBusy}>
-            <Icon name="flag" className="size-4" /> {snapshotBusy ? "Saving…" : "Save Snapshot"}
+            <Icon name="flag" className="size-4" />{" "}
+            {snapshotBusy ? "Saving…" : "Save Snapshot"}
           </Button>
         }
       />
@@ -69,17 +72,23 @@ export default function NetWorthPage() {
       ) : currentRes.data ? (
         <div className="mb-8 rounded-2xl border border-line bg-surface p-6">
           <p className="text-sm text-ink2">Current Net Worth</p>
-          <p className={`tnum mt-2 font-display text-4xl font-bold tracking-tight ${currentRes.data.net_worth < 0 ? "text-neg" : ""}`}>
+          <p
+            className={`tnum mt-2 font-display text-4xl font-bold tracking-tight ${currentRes.data.net_worth < 0 ? "text-neg" : ""}`}
+          >
             {formatMoney(currentRes.data.net_worth, currency, locale)}
           </p>
           <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-ink3">Assets</p>
-              <p className="tnum font-semibold text-pos">{formatMoney(currentRes.data.assets, currency, locale)}</p>
+              <p className="tnum font-semibold text-pos">
+                {formatMoney(currentRes.data.assets, currency, locale)}
+              </p>
             </div>
             <div>
               <p className="text-ink3">Liabilities</p>
-              <p className="tnum font-semibold text-neg">{formatMoney(currentRes.data.liabilities, currency, locale)}</p>
+              <p className="tnum font-semibold text-neg">
+                {formatMoney(currentRes.data.liabilities, currency, locale)}
+              </p>
             </div>
           </div>
         </div>
@@ -104,16 +113,21 @@ export default function NetWorthPage() {
           <h2 className="eyebrow mb-4">History</h2>
           <ul className="divide-y divide-line border-y border-line">
             {historyRes.data.items.map((item) => (
-              <li key={item.id} className="flex items-center justify-between py-4">
+              <li
+                key={item.id}
+                className="flex items-center justify-between py-4"
+              >
                 <div>
-                  <p className="text-[15px] font-medium">{formatDateLong(item.date)}</p>
+                  <p className="text-[15px] font-medium">
+                    {formatDateLong(item.date)}
+                  </p>
                   <p className="text-[13px] text-ink3">
-                    Assets: {formatMoney(item.assets, currency, locale)} · Liabilities: {formatMoney(item.liabilities, currency, locale)}
+                    Assets: {formatMoney(item.assets, currency, locale)} ·
+                    Liabilities:{" "}
+                    {formatMoney(item.liabilities, currency, locale)}
                   </p>
                 </div>
-                <span className={`tnum text-[17px] font-semibold ${item.net_worth < 0 ? "text-neg" : ""}`}>
-                  {formatMoney(item.net_worth, currency, locale)}
-                </span>
+                <span>{item?.date ? formatDateLong(item.date) : "N/A"}</span>
               </li>
             ))}
           </ul>

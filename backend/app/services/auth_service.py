@@ -39,7 +39,24 @@ def _seed_categories(db: Session, user: User) -> None:
 
 
 def _seed_accounts(db: Session, user: User) -> None:
-    db.add(Account(user_id=user.id, name="Cash", type=AccountType.cash, currency=user.currency))
+    default_accounts = [
+        ("Cash", AccountType.cash),
+        ("Bank Account", AccountType.bank),
+        ("Wallet", AccountType.wallet),
+        ("Credit", AccountType.credit),
+        ("Savings", AccountType.savings),
+        ("Investment Account", AccountType.investment),
+    ]
+
+    for name, account_type in default_accounts:
+        db.add(
+            Account(
+                user_id=user.id,
+                name=name,
+                type=account_type,
+                currency=user.currency,
+            )
+        )
 
 
 def register(db: Session, *, name: str, email: str, password: str, currency: str, locale: str) -> User:

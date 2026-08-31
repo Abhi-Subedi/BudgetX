@@ -1,59 +1,42 @@
-from fastapi import APIRouter, Query, status
+# app/api/debts.py (or app/routers/debts.py)
 
-from app.api.deps import CurrentUser, DbSession
-from app.schemas.debt import (
-    DebtCreate,
-    DebtPaymentCreate,
-    DebtPaymentRead,
-    DebtRead,
-    DebtSummary,
-    DebtUpdate,
-)
-from app.services import debt_service
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-router = APIRouter(tags=["debts"])
+from app.db.session import get_db
+from app.models.debt import Debt
+from app.schemas.debt import DebtRead, DebtSummary
+
+router = APIRouter(prefix="/debts", tags=["debts"])
 
 
-@router.get("/debts")
-def list_debts(
-    user: CurrentUser,
-    db: DbSession,
-    status: str | None = Query(default=None),
-) -> dict:
-    debts = debt_service.list_debts(db, user.id, status)
-    return {"items": debts, "total": len(debts)}
+# Schema for list response wrapper
+class DebtListResponse(BaseModel):
+    items: list[DebtRead]
 
 
-@router.post("/debts", status_code=status.HTTP_201_CREATED)
-def create_debt(payload: DebtCreate, user: CurrentUser, db: DbSession) -> DebtRead:
-    return debt_service.create_debt(db, user.id, payload)
+@router.get("", response_model=DebtListResponse)
+def get_debts(db: Session = Depends(get_db)):
+    debts = db.query(Debt).all()
+    # FastAPI automatically serializes SQLAlchemy Debt models into DebtRead objects
+    return {"items": debts}
 
 
-@router.get("/debts/{debt_id}")
-def get_debt(debt_id: int, user: CurrentUser, db: DbSession) -> DebtRead:
-    from app.services.common import get_owned
-    from app.models import Debt
+@router.get("/summary", response_model=DebtSummary)
+def get_debt_summary(db: Session = Depends(get_db)):
+    debts = db.query(Debt).all()
+    
+    total_debt = sum(d.principal for d in debts)
+    total_remaining = sum(d.remaining_balance for d in debts)
+    monthly_payments = sum(d.minimum_payment for d in debts if d.remaining_balance > 0)
+    active_debts = sum(1 for d in debts if d.remaining_balance > 0)
 
-    debt = get_owned(db, Debt, debt_id, user.id, "Debt")
-    return debt
-
-
-@router.patch("/debts/{debt_id}")
-def update_debt(debt_id: int, payload: DebtUpdate, user: CurrentUser, db: DbSession) -> DebtRead:
-    return debt_service.update_debt(db, user.id, debt_id, payload)
-
-
-@router.delete("/debts/{debt_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_debt(debt_id: int, user: CurrentUser, db: DbSession) -> None:
-    debt_service.delete_debt(db, user.id, debt_id)
-
-
-@router.post("/debts/{debt_id}/payments", status_code=status.HTTP_201_CREATED)
-def create_payment(debt_id: int, payload: DebtPaymentCreate, user: CurrentUser, db: DbSession) -> DebtPaymentRead:
-    return debt_service.make_payment(db, user.id, debt_id, payload)
-
-
-@router.get("/debts/summary")
-def get_summary(user: CurrentUser, db: DbSession) -> DebtSummary:
-    summary = debt_service.get_debt_summary(db, user.id)
-    return summary
+    return DebtSummary(
+        total_debt=total_debt,
+        total_paid=total_debt - total_remaining,
+        total_remaining=total_remaining,
+        active_debts=active_debts,
+        monthly_payments=monthly_payments,
+        debts=debts,
+    )

@@ -94,7 +94,7 @@ function HealthBody({ data }: { data: HealthResponse }) {
       </section>
 
       <section>
-        <h2 className="mb-4 font-display text-[15px] font-bold tracking-tight text-paper">Dimension Breakdown</h2>
+        <h2 className="mb-4 font-display text-[15px] font-bold tracking-tight text-white">Dimension Breakdown</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(data.dimensions).map(([key, value]) => {
             const label = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -119,7 +119,7 @@ function HealthBody({ data }: { data: HealthResponse }) {
 
       {data.insights.length > 0 && (
         <section className="rounded-2xl border border-line bg-surface p-5">
-          <h2 className="mb-3 font-display text-[15px] font-bold tracking-tight text-paper">Insights</h2>
+          <h2 className="mb-3 font-display text-[15px] font-bold tracking-tight text-white">Insights</h2>
           <ul className="space-y-3">
             {data.insights.map((insight, i) => (
               <li key={i} className="flex items-start gap-3">

@@ -6,7 +6,7 @@ export interface OAuthResult {
   state: string | null;
 }
 
-export function openOAuthPopup(provider: "google" | "apple"): Promise<OAuthResult> {
+export function openOAuthPopup(provider: "google"): Promise<OAuthResult> {
   return new Promise(async (resolve, reject) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "/api"}/oauth/${provider}`, {

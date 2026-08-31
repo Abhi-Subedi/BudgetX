@@ -10,7 +10,7 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
   return (
     <div className="space-y-2.5">
       {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton key={i} className={`h-3.5 ${i === lines - 1 ? "w-2/5" : "w-full"}`} />
+        <Skeleton key={i} className={`h-3.5 ${i === lines - 1 ? "w-fit" : "w-full"}`} />
       ))}
     </div>
   );

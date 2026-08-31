@@ -18,14 +18,27 @@ interface AuditEntry {
   created_at: string;
 }
 
-const ENTITY_TYPES = ["all", "transaction", "budget", "goal", "account", "category", "bill", "subscription"];
+const ENTITY_TYPES = [
+  "all",
+  "transaction",
+  "budget",
+  "goal",
+  "account",
+  "category",
+  "bill",
+  "subscription",
+];
 
 function actionBadgeTone(action: string) {
   switch (action) {
-    case "create": return "pos" as const;
-    case "update": return "warn" as const;
-    case "delete": return "neg" as const;
-    default: return "neutral" as const;
+    case "create":
+      return "pos" as const;
+    case "update":
+      return "warn" as const;
+    case "delete":
+      return "neg" as const;
+    default:
+      return "neutral" as const;
   }
 }
 
@@ -41,13 +54,15 @@ function formatTimestamp(iso: string) {
 
 export default function AuditLogPage() {
   const [entityFilter, setEntityFilter] = useState("all");
-  const endpoint = entityFilter === "all"
-    ? "/audit-log?limit=50"
-    : `/audit-log?limit=50&entity_type=${entityFilter}`;
+  const endpoint =
+    entityFilter === "all"
+      ? "/audit-log?limit=50"
+      : `/audit-log?limit=50&entity_type=${entityFilter}`;
 
   const logRes = useResource<{ items: AuditEntry[] }>(endpoint);
 
-  if (logRes.error) return <ErrorState message={logRes.error} onRetry={logRes.reload} />;
+  if (logRes.error)
+    return <ErrorState message={logRes.error} onRetry={logRes.reload} />;
 
   return (
     <div>
@@ -90,14 +105,19 @@ export default function AuditLogPage() {
         <section className="rounded-2xl border border-line bg-surface">
           <ul className="divide-y divide-line/70">
             {logRes.data.items.map((entry) => (
-              <li key={entry.id} className="flex items-start gap-4 p-4 transition-colors hover:bg-sunken/30">
+              <li
+                key={entry.id}
+                className="flex items-start gap-4 p-4 transition-colors hover:bg-sunken/30"
+              >
                 <Badge tone={actionBadgeTone(entry.action)}>
                   {entry.action}
                 </Badge>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-paper">
+                  <p className="text-sm font-medium text-white">
                     {entry.entity_type.replace(/_/g, " ")}
-                    <span className="ml-1.5 text-xs text-ink3">#{entry.entity_id}</span>
+                    <span className="ml-1.5 text-xs text-ink3">
+                      #{entry.entity_id}
+                    </span>
                   </p>
                   {entry.details && Object.keys(entry.details).length > 0 ? (
                     <p className="mt-0.5 text-xs text-ink3 truncate">

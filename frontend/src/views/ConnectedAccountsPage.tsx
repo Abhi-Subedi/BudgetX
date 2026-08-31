@@ -50,8 +50,7 @@ export default function ConnectedAccountsPage() {
     icon: string;
     description: string;
   }> = [
-    { id: "google", label: "Google", icon: "spark", description: "Sign in with your Google account" },
-    { id: "apple", label: "Apple", icon: "heart", description: "Sign in with your Apple ID" }
+    { id: "google", label: "Google", icon: "spark", description: "Sign in with your Google account" }
   ];
 
   return (
@@ -129,7 +128,7 @@ export default function ConnectedAccountsPage() {
                         size="sm"
                         onClick={async () => {
                           try {
-                            const { code } = await openOAuthPopup(provider.id as "google" | "apple");
+                            const { code } = await openOAuthPopup(provider.id as "google");
                             await api.post(`/oauth/${provider.id}/link`, { code });
                             toast(`${provider.label} account connected!`);
                             const res = await api.get<{ providers: Provider[] }>("/oauth/providers");

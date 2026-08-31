@@ -73,7 +73,7 @@ export function NotificationsBell() {
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-lg border border-line bg-surface shadow-lift animate-pop-in">
+        <div className="absolute right-[-85vw] bottom-3 z-50 w-80 overflow-hidden rounded-lg border border-line bg-surface shadow-lift animate-pop-in">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <span className="text-sm font-semibold">Notifications</span>
             {unread > 0 ? (

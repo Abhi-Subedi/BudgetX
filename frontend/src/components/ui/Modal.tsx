@@ -62,7 +62,7 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center w-full h-full sm:items-center mt-10"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -75,7 +75,7 @@ export function Modal({ open, onClose, title, children, wide = false }: ModalPro
       <div
         ref={panelRef}
         tabIndex={-1}
-        className={`relative max-h-[92dvh] w-full overflow-y-auto overscroll-contain rounded-t-xl bg-surface shadow-modal outline-none animate-pop-in sm:rounded-lg ${
+        className={`relative max-h-[92dvh] w-full top-[15vh] overflow-y-auto overscroll-contain rounded-t-xl bg-surface shadow-modal outline-none animate-pop-in sm:rounded-lg ${
           wide ? "sm:max-w-xl" : "sm:max-w-md"
         }`}
       >

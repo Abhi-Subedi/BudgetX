@@ -7,7 +7,7 @@ from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-auth_limit = rate_limit(times=10, window_seconds=60)
+auth_limit = rate_limit(config_name="auth")
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED, dependencies=[Depends(auth_limit)])

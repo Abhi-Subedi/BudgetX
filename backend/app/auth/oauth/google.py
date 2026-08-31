@@ -56,7 +56,7 @@ def exchange_code(code: str) -> dict:
         "redirect_uri": get_redirect_uri(),
         "grant_type": "authorization_code",
     }
-    resp = httpx.post(GOOGLE_TOKEN_URL, data=data, timeout=15)
+    resp = httpx.get(GOOGLE_TOKEN_URL, data=data, timeout=15)
     if resp.status_code != 200:
         detail = resp.json().get("error_description", resp.text)
         raise AppError(400, f"Google token exchange failed: {detail}")

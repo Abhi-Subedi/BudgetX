@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import { PageHeader } from "../components/layout/AppShell";
 import { Button } from "../components/ui/Button";
-import { Field } from "../components/ui/Input";
-import { Select } from "../components/ui/Input";
+import { Field, Select } from "../components/ui/Input";
 import { ConfirmDialog, Modal } from "../components/ui/Modal";
 import { EmptyState, ErrorState, SkeletonRows } from "../components/ui/States";
 import { Icon } from "../components/icons";
@@ -28,19 +27,37 @@ interface Transfer {
   created_at: string;
 }
 
+type AccountsResponse = Account[] | { items: Account[] };
+type TransfersResponse = Transfer[] | { items: Transfer[] };
+
 export default function TransfersPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const currency = user?.currency ?? "USD";
   const locale = user?.locale ?? "en-US";
-  const transfersRes = useResource<{ items: Transfer[] }>("/transfers");
-  const accountsRes = useResource<{ items: Account[] }>("/accounts");
+
+  const transfersRes = useResource<TransfersResponse>("/transfers");
+  const accountsRes = useResource<AccountsResponse>("/accounts");
 
   const [createOpen, setCreateOpen] = useState(false);
   const [deleting, setDeleting] = useState<Transfer | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
 
-  const accounts = accountsRes.data?.items ?? [];
+  // Safely extract transfers array regardless of API payload format
+  const transfers = useMemo<Transfer[]>(() => {
+    if (!transfersRes.data) return [];
+    if (Array.isArray(transfersRes.data)) return transfersRes.data;
+    if (Array.isArray(transfersRes.data.items)) return transfersRes.data.items;
+    return [];
+  }, [transfersRes.data]);
+
+  // Safely extract accounts array regardless of API payload format
+  const accounts = useMemo<Account[]>(() => {
+    if (!accountsRes.data) return [];
+    if (Array.isArray(accountsRes.data)) return accountsRes.data;
+    if (Array.isArray(accountsRes.data.items)) return accountsRes.data.items;
+    return [];
+  }, [accountsRes.data]);
 
   const confirmDelete = async () => {
     if (!deleting) return;
@@ -73,7 +90,7 @@ export default function TransfersPage() {
         <ErrorState message={transfersRes.error} onRetry={transfersRes.reload} />
       ) : transfersRes.loading ? (
         <SkeletonRows rows={4} />
-      ) : !transfersRes.data || transfersRes.data.items.length === 0 ? (
+      ) : transfers.length === 0 ? (
         <EmptyState
           icon={<Icon name="chevron-right" className="size-8" />}
           title="No transfers yet"
@@ -86,7 +103,7 @@ export default function TransfersPage() {
         />
       ) : (
         <ul className="divide-y divide-line border-y border-line">
-          {transfersRes.data.items.map((transfer) => (
+          {transfers.map((transfer) => (
             <li key={transfer.id} className="group flex items-center gap-4 py-4">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-sunken text-ink2">
                 <Icon name="chevron-right" className="size-4" />
@@ -112,7 +129,7 @@ export default function TransfersPage() {
               </div>
               <button
                 onClick={() => setDeleting(transfer)}
-                aria-label={`Delete transfer`}
+                aria-label="Delete transfer"
                 className="hidden size-8 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-negtint hover:text-neg group-hover:grid focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
               >
                 <Icon name="trash" className="size-4" />
@@ -125,6 +142,7 @@ export default function TransfersPage() {
       <TransferFormModal
         open={createOpen}
         accounts={accounts}
+        loadingAccounts={accountsRes.loading}
         onClose={() => setCreateOpen(false)}
         onSaved={(m) => {
           toast(m);
@@ -147,11 +165,13 @@ export default function TransfersPage() {
 function TransferFormModal({
   open,
   accounts,
+  loadingAccounts,
   onClose,
   onSaved
 }: {
   open: boolean;
   accounts: Account[];
+  loadingAccounts?: boolean;
   onClose: () => void;
   onSaved: (msg: string) => void;
 }) {
@@ -163,6 +183,18 @@ function TransferFormModal({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Reset errors and inputs when modal opens
+  useEffect(() => {
+    if (open) {
+      setError(null);
+      setFromAccountId("");
+      setToAccountId("");
+      setAmount("");
+      setFee("");
+      setNote("");
+    }
+  }, [open]);
+
   if (!open) return null;
 
   const submit = async () => {
@@ -171,6 +203,7 @@ function TransferFormModal({
     if (!toAccountId) return setError("Select a destination account.");
     if (fromAccountId === toAccountId) return setError("Source and destination must be different.");
     if (!amountVal || amountVal <= 0) return setError("Enter an amount greater than zero.");
+    
     setBusy(true);
     try {
       await post("/transfers", {
@@ -181,11 +214,6 @@ function TransferFormModal({
         note: note.trim() || null
       });
       onSaved("Transfer recorded");
-      setFromAccountId("");
-      setToAccountId("");
-      setAmount("");
-      setFee("");
-      setNote("");
       onClose();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not record the transfer.");
@@ -197,30 +225,58 @@ function TransferFormModal({
   return (
     <Modal open={open} onClose={onClose} title="New Transfer">
       <div className="space-y-4 px-5 pb-6 pt-5 sm:px-6">
+        {/* Source Account Dropdown */}
         <Select
           label="From Account"
           value={fromAccountId}
-          onChange={(e) => { setFromAccountId(e.target.value); setError(null); }}
+          disabled={loadingAccounts}
+          onChange={(e) => {
+            setFromAccountId(e.target.value);
+            setError(null);
+          }}
         >
-          <option value="">Select account…</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
+          {loadingAccounts ? (
+            <option value="">Loading accounts…</option>
+          ) : accounts.length === 0 ? (
+            <option value="">No accounts found</option>
+          ) : (
+            <>
+              <option value="">Select account…</option>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} ({a.type ? a.type.toUpperCase() : "ACCOUNT"}) — {a.currency}
+                </option>
+              ))}
+            </>
+          )}
         </Select>
+
+        {/* Destination Account Dropdown */}
         <Select
           label="To Account"
           value={toAccountId}
-          onChange={(e) => { setToAccountId(e.target.value); setError(null); }}
+          disabled={loadingAccounts}
+          onChange={(e) => {
+            setToAccountId(e.target.value);
+            setError(null);
+          }}
         >
-          <option value="">Select account…</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
+          {loadingAccounts ? (
+            <option value="">Loading accounts…</option>
+          ) : accounts.length === 0 ? (
+            <option value="">No accounts found</option>
+          ) : (
+            <>
+              <option value="">Select account…</option>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} ({a.type ? a.type.toUpperCase() : "ACCOUNT"}) — {a.currency}
+                </option>
+              ))}
+            </>
+          )}
         </Select>
+
         <div className="grid grid-cols-2 gap-4">
           <Field
             label="Amount"
@@ -237,22 +293,29 @@ function TransferFormModal({
             onChange={(e) => setFee(e.target.value.replace(/[^\d.]/g, ""))}
           />
         </div>
+
         <Field
           label="Note (optional)"
           placeholder="e.g. Savings contribution"
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
+
         {error ? (
           <p role="alert" className="rounded-md bg-negtint px-3.5 py-2.5 text-sm text-neg animate-fade-in">
             {error}
           </p>
         ) : null}
+
         <div className="flex justify-end gap-2.5 pt-1">
-          <button onClick={onClose} className="h-10 rounded-md px-4 text-sm font-medium text-ink2 transition-colors hover:bg-sunken hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-10 rounded-md px-4 text-sm font-medium text-ink2 transition-colors hover:bg-sunken hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+          >
             Cancel
           </button>
-          <Button onClick={() => void submit()} disabled={busy}>
+          <Button onClick={() => void submit()} disabled={busy || loadingAccounts}>
             {busy ? "Recording…" : "Record Transfer"}
           </Button>
         </div>
@@ -260,5 +323,3 @@ function TransferFormModal({
     </Modal>
   );
 }
-
-

@@ -59,10 +59,10 @@ export function Sidebar() {
             <Link
               key={item.to}
               href={item.to}
-              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand ${
+              className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 focus-visible:outline focus-visible:outline-2 mb-2 focus-visible:outline-brand ${
                 active
                   ? "bg-brand text-[#06251C]"
-                  : "text-ink2 hover:bg-sunken hover:text-paper"
+                  : "text-ink2 hover:bg-sunken"
               }`}
             >
               <Icon name={item.icon} className={`size-[18px] ${active ? "" : "text-ink3 group-hover:text-ink2"}`} />
@@ -82,7 +82,7 @@ export function Sidebar() {
             <Icon name="crown" className="size-[18px]" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-sm font-semibold text-paper">Try Premium</span>
+            <span className="block text-sm font-semibold text-white">Try Premium</span>
             <span className="block text-xs leading-snug text-ink3">Unlock advanced analytics and more</span>
           </span>
           <Icon name="chevron-right" className="size-4 shrink-0 text-ink3 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -91,7 +91,7 @@ export function Sidebar() {
         <nav aria-label="Secondary" className="space-y-0.5">
           <Link
             href="/settings"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink2 transition-colors duration-200 hover:bg-sunken hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink2 transition-colors duration-200 hover:bg-sunken hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
           >
             <Icon name="settings" className="size-[18px] text-ink3" />
             Settings
@@ -99,7 +99,7 @@ export function Sidebar() {
           <button
             type="button"
             onClick={() => toast("The help center is coming soon.", "info")}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink2 transition-colors duration-200 hover:bg-sunken hover:text-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-ink2 transition-colors duration-200 hover:bg-sunken hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
           >
             <Icon name="help" className="size-[18px] text-ink3" />
             Help &amp; Support

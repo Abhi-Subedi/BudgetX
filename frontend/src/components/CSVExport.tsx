@@ -37,14 +37,32 @@ export function CSVExport() {
     setError(null);
     setSuccess(false);
     try {
-      const data = await api.get<{ items: Transaction[] }>("/transactions?limit=9999");
+      const data = await api.get<{ items: Transaction[] }>(
+        "/transactions?limit=9999",
+      );
       const transactions = data.items ?? [];
 
-      const headers = ["date", "type", "amount", "category", "account", "payee", "note"];
+      const headers = [
+        "date",
+        "type",
+        "amount",
+        "category",
+        "account",
+        "payee",
+        "note",
+      ];
       const rows = [
         headers.join(","),
         ...transactions.map((t) =>
-          toCSVRow([t.date, t.type, t.amount, t.category, t.account, t.payee, t.note])
+          toCSVRow([
+            t.date,
+            t.type,
+            t.amount,
+            t.category,
+            t.account,
+            t.payee,
+            t.note,
+          ]),
         ),
       ];
 
@@ -75,13 +93,20 @@ export function CSVExport() {
       <button
         onClick={handleExport}
         disabled={exporting}
-        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-surface px-3.5 text-[13px] font-medium text-ink2 transition-colors hover:bg-sunken/60 hover:text-paper disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-surface px-3.5 text-[13px] font-medium text-ink2 transition-colors hover:bg-sunken/60 hover:text-white disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
       >
-        <Icon name={exporting ? "repeat" : "document-text"} className="size-4" />
+        <Icon
+          name={exporting ? "repeat" : "document-text"}
+          className="size-4"
+        />
         {exporting ? "Exporting..." : "Export CSV"}
       </button>
-      {success ? <span className="text-xs font-medium text-pos">Exported!</span> : null}
-      {error ? <span className="text-xs font-medium text-neg">{error}</span> : null}
+      {success ? (
+        <span className="text-xs font-medium text-pos">Exported!</span>
+      ) : null}
+      {error ? (
+        <span className="text-xs font-medium text-neg">{error}</span>
+      ) : null}
     </div>
   );
 }

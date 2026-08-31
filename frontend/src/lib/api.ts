@@ -1,6 +1,6 @@
 import type { Tokens } from "../types";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;
@@ -157,4 +157,71 @@ export function patch<T>(path: string, body?: unknown): Promise<T> {
 }
 export function del(path: string): Promise<void> {
   return api<void>(path, { method: "DELETE" });
+}
+export async function requests<T = unknown>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    let message = "Request failed.";
+
+    try {
+      const data = await response.json();
+      message =
+        data?.detail ||
+        data?.message ||
+        message;
+    } catch {
+      // Response wasn't JSON.
+    }
+
+    throw new Error(message);
+  }
+
+  // DELETE 204 responses have no body.
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json();
+}
+
+export async function request<T = unknown>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const response = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    let message = "Request failed.";
+
+    try {
+      const data = await response.json();
+      message = data?.detail || data?.message || message;
+    } catch {
+      // No JSON response
+    }
+
+    throw new ApiError(response.status, message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json();
 }
