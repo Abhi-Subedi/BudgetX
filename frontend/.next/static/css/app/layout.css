@@ -681,6 +681,24 @@ video {
 .right-\[-80vw\] {
   right: -80vw;
 }
+.top-\[10vh\] {
+  top: 10vh;
+}
+.top-\[8vh\] {
+  top: 8vh;
+}
+.top-\[3vh\] {
+  top: 3vh;
+}
+.top-\[1vh\] {
+  top: 1vh;
+}
+.top-\[1h\] {
+  top: 1h;
+}
+.top-\[10px\] {
+  top: 10px;
+}
 .z-10 {
   z-index: 10;
 }
@@ -776,6 +794,9 @@ video {
 }
 .mt-auto {
   margin-top: auto;
+}
+.mt-0 {
+  margin-top: 0px;
 }
 .block {
   display: block;

@@ -150,7 +150,7 @@ export function TransactionFormModal({
           />
         )}
 
-        <div className="mt-5 flex items-baseline justify-center gap-2 border-b border-line pb-5">
+        <div className="mt-3 flex items-baseline justify-center gap-2 border-b border-line pb-5">
           <span className={`font-display text-3xl font-medium ${type === "income" ? "text-pos" : "text-ink3"}`}>
             {type === "income" ? "+" : "−"}
           </span>
