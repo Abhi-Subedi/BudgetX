@@ -38,4 +38,6 @@ build/
 backend/.env
 frontend/.env.local
 frontend/.env.production
-frontend/.next
+frontend/.next/
+# Next.js build output
+/.next/
