@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     secret_key: str = "change-me-in-production-use-a-long-random-string"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 14
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000","https://budget-x-ch9q-cr74jhre5-subediabhi453-1568s-projects.vercel.app", "http://127.0.0.1:3000"]
 
     # Google OAuth
     google_client_id: str = ""
