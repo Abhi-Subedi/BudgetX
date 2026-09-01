@@ -31,7 +31,7 @@ cp .env.example .env        # macOS/Linux
 | `ENVIRONMENT` | `development` | `production` disables docs endpoints |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `14` | Refresh token lifetime |
-| `CORS_ORIGINS` | localhost:5173 | JSON list of allowed origins |
+| `CORS_ORIGINS` | localhost:3000 | JSON list of allowed origins |
 
 Generate a secret key:
 
@@ -47,7 +47,7 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 ```bash
 docker compose up -d db          # from repo root
-pip install -r requirements-postgres.txt
+pip install -r requirements.txt
 ```
 
 Then set in `.env`:
@@ -84,17 +84,17 @@ Interactive API docs (development only): http://localhost:8000/api/docs
 ```bash
 cd frontend
 npm install
-npm run dev            # http://localhost:5173
+npm run dev            # http://localhost:3000
 ```
 
 The dev server proxies `/api/*` to `http://localhost:8000`. For a deployed API,
-set `VITE_API_URL=https://your-api.example.com/api` in `.env`.
+set `NEXT_PUBLIC_API_URL=https://your-api.example.com/api` in `.env.local`.
 
 ### Production build
 
 ```bash
-npm run build          # type-checks then bundles into dist/
-npm run preview        # serve the build locally
+npm run build          # type-checks then bundles for production
+npm run start          # serve the production build locally
 ```
 
 ## 4. Tests
@@ -114,3 +114,51 @@ cd frontend && npm test && npm run typecheck && npm run build
 - Run migrations as part of the release pipeline (`alembic upgrade head`).
 - Serve the frontend static bundle from any CDN or static host.
 - Never commit `.env`; rotate `SECRET_KEY` only with a plan to invalidate sessions.
+
+## 6. Vercel Deployment
+
+### Frontend (Next.js)
+
+1. Push the repository to GitHub/GitLab/Bitbucket
+2. Import the project in Vercel
+3. Set the **Root Directory** to `frontend`
+4. Configure Environment Variables in Vercel:
+   - `NEXT_PUBLIC_API_URL` → Your backend Vercel URL + `/api` (e.g., `https://budgetx-api.vercel.app/api`)
+   - `NEXT_PUBLIC_OAUTH_REDIRECT_BASE` → Your frontend Vercel URL (e.g., `https://budgetx-frontend.vercel.app`)
+5. Deploy
+
+### Backend (FastAPI)
+
+1. Import the project in Vercel (separate project)
+2. Set the **Root Directory** to `backend`
+3. Configure Environment Variables in Vercel:
+   - `SECRET_KEY` → Generate with: `python -c "import secrets; print(secrets.token_hex(32))"`
+   - `DATABASE_URL` → PostgreSQL connection string (use Vercel Postgres, Neon, Supabase, etc.)
+   - `ENVIRONMENT` → `production`
+   - `CORS_ORIGINS` → JSON array with your frontend URL (e.g., `["https://budgetx-frontend.vercel.app"]`)
+   - `FRONTEND_URL` → Your frontend Vercel URL
+   - `GOOGLE_CLIENT_ID` → From Google Cloud Console
+   - `GOOGLE_CLIENT_SECRET` → From Google Cloud Console
+   - `APPLE_CLIENT_ID` → (Optional) From Apple Developer
+   - `APPLE_TEAM_ID` → (Optional) From Apple Developer
+   - `APPLE_KEY_ID` → (Optional) From Apple Developer
+   - `APPLE_PRIVATE_KEY` → (Optional) From Apple Developer
+4. Deploy
+
+### Database for Production
+
+For production, use a managed PostgreSQL service:
+- **Vercel Postgres** (integrated)
+- **Neon** (serverless PostgreSQL)
+- **Supabase** (PostgreSQL + auth)
+- **Railway** / **Render** / **Aiven** / **AWS RDS**
+
+Update `DATABASE_URL` in backend Vercel environment variables to point to your production database.
+
+Run migrations after first deployment:
+```bash
+# Using Vercel CLI
+vercel env pull .env.production
+cd backend
+python -m alembic upgrade head
+```

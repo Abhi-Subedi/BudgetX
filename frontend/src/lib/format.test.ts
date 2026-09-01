@@ -33,7 +33,9 @@ describe("formatMoney", () => {
 describe("dates", () => {
   it("round-trips ISO dates", () => {
     const d = new Date(2026, 7, 23);
-    expect(parseISO(isoOf(d)).getDate()).toBe(23);
+    const parsed = parseISO(isoOf(d));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.getDate()).toBe(23);
   });
 
   it("builds a month key", () => {

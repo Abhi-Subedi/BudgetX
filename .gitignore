@@ -32,12 +32,8 @@ Thumbs.db
 
 # Build artifacts
 build/
-.vite/
+.next/
 
 # Environment files
 backend/.env
 frontend/.env.local
-frontend/.env.production
-frontend/.next/
-# Next.js build output
-/.next/

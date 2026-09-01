@@ -49,17 +49,25 @@ function Card({
   children,
   className = "",
   bodyClassName = "",
+  interactive = false,
+  onClick,
 }: {
   title?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   bodyClassName?: string;
+  interactive?: boolean;
+  onClick?: () => void;
 }) {
   return (
     <section
       aria-label={title}
-      className={`group rounded-2xl border border-line bg-surface p-6 transition-all duration-300 ease-out  hover:border-ink3/40 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 ${className}`}
+      className={`group rounded-2xl border border-line bg-surface p-6 transition-all duration-300 ease-out  hover:border-ink3/40 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 ${interactive ? 'cursor-pointer hover:bg-surface/80' : ''} ${className}`}
+      onClick={onClick}
+      role={interactive ? 'button' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={interactive && onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }} : undefined}
     >
       {title ? (
         <header className="mb-5 flex items-center justify-between gap-3">
@@ -81,7 +89,7 @@ function ViewAllLink({ href }: { href: string }) {
   return (
     <Link
       href={href}
-      className="text-xs font-semibold text-brand transition-colors hover:text-brand-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+      className="text-xs font-semibold text-brand transition-colors hover:text-brand-strong cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
     >
       View all
     </Link>
@@ -143,7 +151,6 @@ function StatTile({
         : tone === "brand"
           ? "bg-brand"
           : "bg-info";
-
   return (
     <div
       className={`group flex min-w-0 flex-col gap-3 rounded-2xl border border-line border-l-[3px] ${TONE_BORDER[tone]} bg-gradient-to-br ${TONE_BG[tone]} to-surface p-5 transition-all duration-300 ease-out  hover:border-ink3/40 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20`}
@@ -317,7 +324,7 @@ export default function DashboardPage() {
   /* ---------------------------------------------------------------------- */
 
   return (
-    <div className="w-full min-w-0">
+    <div className="w-full min-w-0 px-2 sm:px-0">
       {/* Header */}
 
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -986,7 +993,7 @@ const DashboardBody = React.memo(function DashboardBody({
         {/* Health Score */}
 
         {healthScore ? (
-          <Card title="Financial Health Score">
+          <Card title="Financial Health Score" interactive>
             <div className="flex items-center gap-6">
               <div className="relative size-24 shrink-0">
                 <svg viewBox="0 0 36 36" className="size-full -rotate-90">

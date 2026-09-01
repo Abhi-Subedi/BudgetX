@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.core import rate_limit
+from app.core.rate_limit import _rate_limiter
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
@@ -34,11 +34,11 @@ def client(db_engine):
             db.close()
 
     app.dependency_overrides[get_db] = override_get_db
-    rate_limit._buckets.clear()
+    _rate_limiter._buckets.clear()
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
-    rate_limit._buckets.clear()
+    _rate_limiter._buckets.clear()
 
 
 def register_and_login(client, *, name="Asha Rai", email="asha@example.com", password="hunter2secret", currency="USD"):

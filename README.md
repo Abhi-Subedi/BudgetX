@@ -6,7 +6,7 @@ money actually goes.
 
 BudgetX is a full-stack product:
 
-- **Frontend:** React 18 + TypeScript + Vite + Tailwind CSS
+- **Frontend:** React 18 + TypeScript + Next.js 14 (App Router) + Tailwind CSS
 - **Backend:** Python + FastAPI + SQLAlchemy 2.0 + Pydantic v2
 - **Database:** PostgreSQL (SQLite supported for instant local development)
 - **Migrations:** Alembic · **Auth:** JWT access/refresh tokens, scrypt password hashing
@@ -30,10 +30,10 @@ copy .env.example .env
 # 2. Frontend (new terminal)
 cd frontend
 npm install
-npm run dev          # http://localhost:5173
+npm run dev          # http://localhost:3000
 ```
 
-Open http://localhost:5173, create an account, and you're in.
+Open http://localhost:3000, create an account, and you're in.
 
 Detailed setup (PostgreSQL, Docker, production builds): see [SETUP.md](SETUP.md).
 
