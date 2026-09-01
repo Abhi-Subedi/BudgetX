@@ -4,7 +4,6 @@
 
 - **Node.js 18+** and npm
 - **Python 3.11+** (3.12/3.13/3.14 supported)
-- PostgreSQL 14+ (optional — SQLite works out of the box for development)
 
 ## 2. Backend
 
@@ -27,7 +26,7 @@ cp .env.example .env        # macOS/Linux
 | Variable | Default | Purpose |
 |---|---|---|
 | `SECRET_KEY` | dev placeholder | JWT signing. **Set a long random value in production** |
-| `DATABASE_URL` | `sqlite:///./budgetx.db` | Any SQLAlchemy URL |
+| `DATABASE_URL` | `sqlite:///./budgetx.db` | SQLite database (used for both dev and production) |
 | `ENVIRONMENT` | `development` | `production` disables docs endpoints |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `14` | Refresh token lifetime |
@@ -41,20 +40,7 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 ### Database
 
-**SQLite (zero setup):** nothing to do.
-
-**PostgreSQL (recommended beyond local play):**
-
-```bash
-docker compose up -d db          # from repo root
-pip install -r requirements.txt
-```
-
-Then set in `.env`:
-
-```
-DATABASE_URL=postgresql+psycopg://budgetx:budgetx@localhost:5432/budgetx
-```
+**SQLite (zero setup):** nothing to do. Uses `budgetx.db` file in the backend directory for both development and production.
 
 ### Migrations
 
@@ -133,7 +119,7 @@ cd frontend && npm test && npm run typecheck && npm run build
 2. Set the **Root Directory** to `backend`
 3. Configure Environment Variables in Vercel:
    - `SECRET_KEY` → Generate with: `python -c "import secrets; print(secrets.token_hex(32))"`
-   - `DATABASE_URL` → PostgreSQL connection string (use Vercel Postgres, Neon, Supabase, etc.)
+   - `DATABASE_URL` → `sqlite:///./budgetx.db` (SQLite for both dev and production)
    - `ENVIRONMENT` → `production`
    - `CORS_ORIGINS` → JSON array with your frontend URL (e.g., `["https://budgetx-frontend.vercel.app"]`)
    - `FRONTEND_URL` → Your frontend Vercel URL
@@ -145,15 +131,7 @@ cd frontend && npm test && npm run typecheck && npm run build
    - `APPLE_PRIVATE_KEY` → (Optional) From Apple Developer
 4. Deploy
 
-### Database for Production
-
-For production, use a managed PostgreSQL service:
-- **Vercel Postgres** (integrated)
-- **Neon** (serverless PostgreSQL)
-- **Supabase** (PostgreSQL + auth)
-- **Railway** / **Render** / **Aiven** / **AWS RDS**
-
-Update `DATABASE_URL` in backend Vercel environment variables to point to your production database.
+**Note on SQLite with Vercel:** SQLite runs from the filesystem. On Vercel's serverless functions, the filesystem is read-only except for `/tmp`. For a portfolio project, SQLite works well. The database file will be created at `/tmp/budgetx.db` in production. For persistence across deployments, consider a managed database, but for a portfolio/demo this is acceptable.
 
 Run migrations after first deployment:
 ```bash
