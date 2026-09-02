@@ -26,7 +26,7 @@ cp .env.example .env        # macOS/Linux
 | Variable | Default | Purpose |
 |---|---|---|
 | `SECRET_KEY` | dev placeholder | JWT signing. **Set a long random value in production** |
-| `DATABASE_URL` | `sqlite:///./budgetx.db` | SQLite database (used for both dev and production) |
+| `DATABASE_URL` | `sqlite:///./budgetx.db` | Database URL (SQLite for local, PostgreSQL for production) |
 | `ENVIRONMENT` | `development` | `production` disables docs endpoints |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Access token lifetime |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `14` | Refresh token lifetime |
@@ -40,7 +40,22 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 ### Database
 
-**SQLite (zero setup):** nothing to do. Uses `budgetx.db` file in the backend directory for both development and production.
+**Local Development (SQLite - zero setup):**
+```bash
+DATABASE_URL=sqlite:///./budgetx.db
+```
+Uses `budgetx.db` file in the backend directory. Nothing else to configure.
+
+**Production on Vercel (PostgreSQL required):**
+SQLite doesn't work on Vercel's serverless filesystem (read-only). Use a managed PostgreSQL:
+- **Neon** (free tier, serverless) - https://neon.tech — *Recommended*
+- **Vercel Postgres** (integrated) - https://vercel.com/docs/storage/vercel-postgres
+- **Supabase** (free tier) - https://supabase.com
+
+Set in Vercel Environment Variables:
+```
+DATABASE_URL=postgresql+psycopg://user:password@host:5432/dbname?sslmode=require
+```
 
 ### Migrations
 
@@ -119,7 +134,8 @@ cd frontend && npm test && npm run typecheck && npm run build
 2. Set the **Root Directory** to `backend`
 3. Configure Environment Variables in Vercel:
    - `SECRET_KEY` → Generate with: `python -c "import secrets; print(secrets.token_hex(32))"`
-   - `DATABASE_URL` → `sqlite:///./budgetx.db` (SQLite for both dev and production)
+   - `DATABASE_URL` → PostgreSQL connection string (Neon/Vercel Postgres/Supabase)
+     - Example: `postgresql+psycopg://user:pass@ep-xxx.us-east-1.aws.neon.tech/budgetx?sslmode=require`
    - `ENVIRONMENT` → `production`
    - `CORS_ORIGINS` → JSON array with your frontend URL (e.g., `["https://budgetx-frontend.vercel.app"]`)
    - `FRONTEND_URL` → Your frontend Vercel URL
@@ -131,12 +147,18 @@ cd frontend && npm test && npm run typecheck && npm run build
    - `APPLE_PRIVATE_KEY` → (Optional) From Apple Developer
 4. Deploy
 
-**Note on SQLite with Vercel:** SQLite runs from the filesystem. On Vercel's serverless functions, the filesystem is read-only except for `/tmp`. For a portfolio project, SQLite works well. The database file will be created at `/tmp/budgetx.db` in production. For persistence across deployments, consider a managed database, but for a portfolio/demo this is acceptable.
+### Quick PostgreSQL Setup (Neon - Recommended)
 
-Run migrations after first deployment:
-```bash
-# Using Vercel CLI
-vercel env pull .env.production
-cd backend
-python -m alembic upgrade head
-```
+1. Go to https://neon.tech and sign up (free)
+2. Create a project named "budgetx"
+3. Copy the connection string (looks like `postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname?sslmode=require`)
+4. Add `+psycopg` after `postgresql://` → `postgresql+psycopg://user:pass@...`
+5. Paste as `DATABASE_URL` in Vercel backend environment variables
+6. Run migrations after first deploy:
+   ```bash
+   vercel env pull .env.production
+   cd backend
+   python -m alembic upgrade head
+   ```
+
+**Why PostgreSQL on Vercel?** Vercel's serverless functions have a read-only filesystem. SQLite requires a writable file, which only works in `/tmp` (ephemeral, lost on cold starts). PostgreSQL works natively with connection pooling and is the standard for serverless deployments.
